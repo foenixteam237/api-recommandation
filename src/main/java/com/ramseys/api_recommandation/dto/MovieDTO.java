@@ -1,5 +1,6 @@
 package com.ramseys.api_recommandation.dto;
 
+import java.util.List;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
@@ -14,5 +15,5 @@ public class MovieDTO {
     private String director;
     private int duration;
     private double rating;
-    private Set<String> genres;
+    private List<String> genres;
 }

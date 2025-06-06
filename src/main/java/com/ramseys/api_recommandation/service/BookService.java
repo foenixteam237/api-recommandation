@@ -3,6 +3,7 @@ package com.ramseys.api_recommandation.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class BookService {
+    @Autowired
     private final BookRepository bookRepository;
 
     public Page<BookDTO> searchBooks(MediaSearchRequest request, Pageable pageable) {
@@ -40,20 +42,10 @@ public class BookService {
                     request.getMaxPages() != null ? request.getMaxPages() : Integer.MAX_VALUE));
         }
         
-        Page<Book> books = bookRepository.findAll(pageable);
+        return bookRepository.findAll(pageable).map(this::convertToDTO);
+        //Page<Book> books = bookRepository.findAll(pageable);
         
-        return books.map(book -> new BookDTO(
-            book.getId(),
-            book.getTitle(),
-            book.getReleaseYear(),
-            book.getAuthor(),
-            book.getPageCount(),
-            book.getPublisher(),
-            book.getTags().stream()
-                .filter(t -> "genre".equals(t.getCategory()))
-                .map(Tag::getName)
-                .collect(Collectors.toSet())
-        ));
+    
     }
     
     public List<String> getAllAuthors() {
@@ -62,5 +54,15 @@ public class BookService {
     
     public List<String> getAllGenres() {
         return bookRepository.findAllBookGenres();
+    }
+     private BookDTO convertToDTO(Book book) {
+        BookDTO dto = new BookDTO(null, null, 0, null, 0, null, null);
+        dto.setId(book.getId());
+        dto.setTitle(book.getTitle());
+        dto.setAuthor(book.getAuthor());
+        dto.setReleaseYear(book.getReleaseYear());
+        dto.setPageCount(book.getPageCount());
+        dto.setGenres(book.getGenres());
+        return dto;
     }
 }

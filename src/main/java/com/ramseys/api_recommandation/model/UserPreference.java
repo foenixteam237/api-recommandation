@@ -16,14 +16,12 @@ public class UserPreference {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    
     @ManyToOne
     @JoinColumn(name = "tag_id")
     private Tag tag;
-    
-    private int weight = 1;
+    private double weight;
+    // Getters et Setters
 }

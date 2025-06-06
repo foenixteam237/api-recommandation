@@ -1,4 +1,6 @@
 package com.ramseys.api_recommandation.model;
+import java.util.Set;
+
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.Data;
@@ -12,6 +14,7 @@ public class Book extends Media {
     private String author;
     private int pageCount;
     private String publisher;
+    private Set<String> genres;
     public String getPublisher() {
         return publisher;
     }

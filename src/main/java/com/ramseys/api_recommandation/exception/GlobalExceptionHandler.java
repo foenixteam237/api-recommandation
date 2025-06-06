@@ -8,6 +8,7 @@ package com.ramseys.api_recommandation.exception;
        @ExceptionHandler(Exception.class)
        public ResponseEntity<String> handleException(Exception e) {
            // Log l'exception ici si nécessaire
+           e.printStackTrace(); // important pour voir le détail
            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                    .body("Une erreur est survenue : " + e.getMessage());
        }

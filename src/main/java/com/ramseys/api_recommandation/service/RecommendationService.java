@@ -7,78 +7,49 @@ import java.util.stream.Collectors;
 import com.ramseys.api_recommandation.dto.MediaDTO;
 import com.ramseys.api_recommandation.dto.RecommandationDTO;
 import com.ramseys.api_recommandation.model.*;
+import com.ramseys.api_recommandation.repository.MovieRepository;
 import com.ramseys.api_recommandation.repository.UserPreferenceRepository;
+import com.ramseys.api_recommandation.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class RecommendationService {
-    private final MediaService mediaService;
     private final UserPreferenceRepository userPreferenceRepository;
-
-    public RecommendationService(MediaService mediaService, 
-                               UserPreferenceRepository userPreferenceRepository) {
-        this.mediaService = mediaService;
+    private final MovieRepository movieRepository; // Assurez-vous d'avoir un repository pour les films
+    public RecommendationService(UserPreferenceRepository userPreferenceRepository, MovieRepository movieRepository) {
         this.userPreferenceRepository = userPreferenceRepository;
+        this.movieRepository = movieRepository;
     }
-
-    public List<RecommandationDTO> getRecommendations(Long userId, int maxResults) {
-        List<UserPreference> preferences = userPreferenceRepository.findByUserId(userId);
-        if (preferences.isEmpty()) return Collections.emptyList();
-
-        List<Long> tagIds = preferences.stream()
-                .map(pref -> pref.getTag().getId())
-                .collect(Collectors.toList());
-
-        List<Media> relevantMedia = mediaService.getMediaByTags(tagIds);
-
-        Map<Long, Integer> mediaScores = new HashMap<>();
-        Map<Long, Media> mediaMap = new HashMap<>();
-
-        for (Media media : relevantMedia) {
-            int score = 0;
-            for (Tag tag : media.getTags()) {
-                for (UserPreference pref : preferences) {
-                    if (pref.getTag().getId().equals(tag.getId())) {
-                        score += pref.getWeight();
-                    }
-                }
-            }
-            mediaScores.put(media.getId(), score);
-            mediaMap.put(media.getId(), media);
-        }
-
-        return mediaScores.entrySet().stream()
-                .sorted(Map.Entry.<Long, Integer>comparingByValue().reversed())
-                .limit(maxResults)
-                .map(entry -> {
-                    Media media = mediaMap.get(entry.getKey());
-                    return new RecommandationDTO();
-                })
-                .collect(Collectors.toList());
-    }
-
-    private MediaDTO convertToDTO(Media media) {
-        MediaDTO dto = new MediaDTO();
-        dto.setId(media.getId());
-        dto.setTitle(media.getTitle());
-        dto.setReleaseYear(media.getReleaseYear());
+  public List<RecommandationDTO> getRecommendations(Long userId, int maxResults) {
+    List<UserPreference> preferences = userPreferenceRepository.findByUserId(userId);
+    List<Tag> tags = preferences.stream()
+                                .map(UserPreference::getTag)
+                                .collect(Collectors.toList());
+    List<Movie> recommendedMovies = movieRepository.findAllByTagsIn(tags);
+    // Ajoutez un log pour vérifier les films récupérés
+    recommendedMovies.forEach(movie -> {
+        System.out.println("Movie ID: " + movie.getId());
+        System.out.println("Movie Title: " + movie.getTitle());
+    });
+    return recommendedMovies.stream()
+                            .limit(maxResults)
+                            .map(this::convertToDTO)
+                            .collect(Collectors.toList());
+}
+    private RecommandationDTO convertToDTO(Movie movie) {
+        RecommandationDTO dto = new RecommandationDTO();
+        dto.setTitle(movie.getTitle());
+        dto.setDirector(movie.getDirector());
+        dto.setDuration(movie.getDuration());
+        dto.setRating(movie.getRating());
+        dto.setReleaseYear(movie.getReleaseYear());
         
-        Set<String> tagNames = media.getTags().stream()
-                .map(Tag::getName)
-                .collect(Collectors.toSet());
-        dto.setTags(tagNames);
-
-        if (media instanceof Movie) {
-            Movie movie = (Movie) media;
-            dto.setType("MOVIE");
-            dto.setDirector(movie.getDirector());
-            dto.setDuration(movie.getDuration());
-        } else if (media instanceof Book) {
-            Book book = (Book) media;
-            dto.setType("BOOK");
-            dto.setAuthor(book.getAuthor());
-            dto.setPageCount(book.getPageCount());
-        }
-        
+        // Récupérer les noms des tags
+        List<String> tagNames = movie.getTags().stream()
+            .map(Tag::getName)
+            .collect(Collectors.toList());
+        dto.setGenres(tagNames); // Ou utilisez setTags() si vous avez une méthode pour les tags
         return dto;
     }
 }

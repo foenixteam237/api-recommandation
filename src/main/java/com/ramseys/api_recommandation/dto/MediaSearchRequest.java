@@ -17,6 +17,7 @@ public class MediaSearchRequest {
     private Integer minPages;
     private Integer maxPages;
     private Double minRating;
+    private List<String> tags;
     private String sortBy; // "title", "releaseYear", "rating", etc.
     private String sortDirection = "asc"; // "asc" or "desc"
 }

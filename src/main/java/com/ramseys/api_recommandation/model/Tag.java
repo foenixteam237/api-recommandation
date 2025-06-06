@@ -10,6 +10,8 @@ import jakarta.persistence.ManyToMany;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Data
 @Entity
 public class Tag {
@@ -20,5 +22,6 @@ public class Tag {
     private String category;
     
     @ManyToMany(mappedBy = "tags")
+    @JsonIgnore
     private Set<Media> media;
 }

@@ -16,15 +16,16 @@ import com.ramseys.api_recommandation.dto.MediaSearchRequest;
 import com.ramseys.api_recommandation.dto.MovieDTO;
 import com.ramseys.api_recommandation.service.MovieService;
 
-import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/api/movies")
-@RequiredArgsConstructor
 public class MovieController {
     private final MovieService movieService;
 
-    @GetMapping
+    public MovieController(MovieService movieService){
+        this.movieService = movieService;
+    }
+
+    @GetMapping("search")
     public ResponseEntity<Page<MovieDTO>> searchMovies(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) Integer minYear,
