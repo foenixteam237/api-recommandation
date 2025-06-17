@@ -13,7 +13,6 @@ import com.ramseys.api_recommandation.dto.BookDTO;
 import com.ramseys.api_recommandation.dto.MediaSearchRequest;
 import com.ramseys.api_recommandation.model.Book;
 import com.ramseys.api_recommandation.model.Media;
-import com.ramseys.api_recommandation.model.Tag;
 import com.ramseys.api_recommandation.repository.BookRepository;
 
 import lombok.RequiredArgsConstructor;
